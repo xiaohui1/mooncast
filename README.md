@@ -46,7 +46,10 @@ services:
     image: ghcr.io/xiaohui1/mooncast:latest
     container_name: mooncast
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "5220:5220"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - TZ=Asia/Shanghai
       - MOONCAST_DATA=/data
