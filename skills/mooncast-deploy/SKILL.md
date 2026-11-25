@@ -6,7 +6,7 @@ description: 部署或升级 月映 · MoonCast（Docker / 飞牛 fnOS）：拉�
 # 月映 · MoonCast 部署与升级技能
 
 ## Docker 部署与升级
-1. 确保宿主机挂载单一数据卷 `-v ./data:/data`（包含 SQLite 数据库、海报缓存、PanSou 缓存与运行日志）。
+1. 确保宿主机挂载单一数据卷 `-v ./data:/data`（包含 SQLite 数据库、海报缓存、搜索缓存与运行日志）。
 2. 拉取最新镜像并重启：
    ```bash
    docker compose pull && docker compose up -d

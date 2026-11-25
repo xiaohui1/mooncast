@@ -6,7 +6,7 @@
 只需映射一个宿主机目录到容器 `/data`，以下全部持久化数据均自动保存在该目录内：
 * `mooncast.db`：SQLite 数据库（用户、影库、追更、历史、设置）
 * `posters/`：本地海报与封面缓存
-* `pansou-cache/`：搜索插件缓存
+* `search-cache/`：内置搜索索引缓存
 * `logs/`：按天分类的运行与播放诊断日志
 * `init_credentials.txt`：首次启动生成的初始管理员账密
 
