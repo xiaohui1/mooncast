@@ -1,0 +1,20 @@
+{
+  "latest_version": "1.3.0",
+  "published_at": "2026-11-25 15:10:56 UTC",
+  "notes": "## 月映 · MoonCast v1.3.0\n\n- 构建基线提交：`6933f72`\n- 适用平台：`linux/amd64`、`linux/arm64`（Docker / 飞牛 fnOS `.fpk` / 独立二进制）\n- 校验文件：`SHA256SUMS`\n\n### 本次更新内容\n1. 影库海报墙支持「点击海报直接续播上次集数与秒数」，保留 `⋯` 与「详情/选集」管理弹窗。\n2. 新增 TMDB + 豆瓣双源手动匹配元数据弹窗，支持海报预览一键应用。\n3. 夸克收藏与追更原样保留防和谐混淆目录与原文件名，绝不改名触发风控。\n4. 追更升级为「选定子文件夹精确同步 + 可视化每天/每周定时刷新」。\n5. 管理员后台按功能模块拆分并新增「系统更新」面板（节点测速、版本检测、更新日志与健康验收）。\n\n### Docker 一键部署（单目录 `/data` 持久化）\n```bash\nmkdir -p mooncast-1.3.0 && unzip -q mooncast-v1.3.0-docker-kit.zip -d mooncast-1.3.0\ncd mooncast-1.3.0 && chmod +x auto-update.sh && docker compose up -d\n```\n\n### 飞牛 fnOS 安装包\n- x86_64 机型：`mooncast_1.3.0_x86.fpk`\n- ARM64 机型：`mooncast_1.3.0_arm.fpk`\n",
+  "release_url": "https://github.com/xiaohui1/mooncast/releases/tag/v1.3.0",
+  "assets": {
+    "linux-amd64": {
+      "name": "mooncast-v1.3.0-linux-amd64.tar.gz",
+      "size": 14099625,
+      "sha256": "dda407c6b45f9ab91471f42115b0d339c00b40a3f4a893254b4fdd8588948263",
+      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.0/mooncast-v1.3.0-linux-amd64.tar.gz"
+    },
+    "linux-arm64": {
+      "name": "mooncast-v1.3.0-linux-arm64.tar.gz",
+      "size": 11953451,
+      "sha256": "c739d875e50ca0b6314db41de03616c8cc6e804287854efbcdbfd578e2bf4a3f",
+      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.0/mooncast-v1.3.0-linux-arm64.tar.gz"
+    }
+  }
+}
