@@ -1,20 +1,20 @@
 {
-  "latest_version": "1.3.1",
-  "published_at": "2026-11-25 16:21:26 UTC",
-  "notes": "## 月映 · MoonCast v1.3.1\n\n- 构建基线提交：`10ae277`\n- 适用平台：`linux/amd64`、`linux/arm64`（Docker / 飞牛 fnOS `.fpk` / 独立二进制）\n- 校验文件：`SHA256SUMS`\n\n### 本次更新内容\n1. 管理员后台「搜索引擎与日志设置」新增 **「测试代理连通性」** 按钮与后端检测接口，支持未保存前实时检测代理延迟与连通状态。\n2. Docker 官方 Compose 模板默认切换为 `network_mode: host`，容器内可直接填写 `http://127.0.0.1:7890` 等宿主机本地代理。\n\n### Docker 一键部署（单目录 `/data` 持久化）\n```bash\nmkdir -p mooncast-1.3.1 && unzip -q mooncast-v1.3.1-docker-kit.zip -d mooncast-1.3.1\ncd mooncast-1.3.1 && chmod +x auto-update.sh && docker compose up -d\n```\n\n### 飞牛 fnOS 安装包\n- x86_64 机型：`mooncast_1.3.1_x86.fpk`\n- ARM64 机型：`mooncast_1.3.1_arm.fpk`\n",
-  "release_url": "https://github.com/xiaohui1/mooncast/releases/tag/v1.3.1",
+  "latest_version": "1.3.2",
+  "published_at": "2026-11-25 16:29:35 UTC",
+  "notes": "## 月映 · MoonCast v1.3.2\n\n- 构建基线提交：`ec546d6`\n- 适用平台：`linux/amd64`、`linux/arm64`（Docker / 飞牛 fnOS `.fpk` / 独立二进制）\n- 校验文件：`SHA256SUMS`\n\n### 本次更新内容\n1. Docker 部署模板恢复为标准 `bridge` 端口映射（`5220:5220`）并内置 `host.docker.internal:host-gateway`，兼顾飞牛/群晖 Docker 面板可点击端口。\n2. 后端自动识别容器环境：当在 Docker 内配置 `http://127.0.0.1:7890` 或 `localhost` 代理时，自动透明映射到宿主机网关，无需修改代理地址即可直连宿主机代理。\n\n### Docker 一键部署（单目录 `/data` 持久化）\n```bash\nmkdir -p mooncast-1.3.2 && unzip -q mooncast-v1.3.2-docker-kit.zip -d mooncast-1.3.2\ncd mooncast-1.3.2 && chmod +x auto-update.sh && docker compose up -d\n```\n\n### 飞牛 fnOS 安装包\n- x86_64 机型：`mooncast_1.3.2_x86.fpk`\n- ARM64 机型：`mooncast_1.3.2_arm.fpk`\n",
+  "release_url": "https://github.com/xiaohui1/mooncast/releases/tag/v1.3.2",
   "assets": {
     "linux-amd64": {
-      "name": "mooncast-v1.3.1-linux-amd64.tar.gz",
-      "size": 14099294,
-      "sha256": "d80145ec4f2408330dbf337904a7f52f2945bfa7dc3a08ba867a0c0c9382b6c4",
-      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.1/mooncast-v1.3.1-linux-amd64.tar.gz"
+      "name": "mooncast-v1.3.2-linux-amd64.tar.gz",
+      "size": 14101569,
+      "sha256": "e635f8373eca610909af39876fa1a4963ca9b808d06701c840695725a8e6b907",
+      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.2/mooncast-v1.3.2-linux-amd64.tar.gz"
     },
     "linux-arm64": {
-      "name": "mooncast-v1.3.1-linux-arm64.tar.gz",
-      "size": 11955167,
-      "sha256": "898adba993e75c0772b9868a591081a797011a07bc4267e4cf701a022d0720ad",
-      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.1/mooncast-v1.3.1-linux-arm64.tar.gz"
+      "name": "mooncast-v1.3.2-linux-arm64.tar.gz",
+      "size": 11956665,
+      "sha256": "1b30ecad0786c1fb640e63c2efc622a98065aeb93f3787990355744338f58f70",
+      "url": "https://github.com/xiaohui1/mooncast/releases/download/v1.3.2/mooncast-v1.3.2-linux-arm64.tar.gz"
     }
   }
 }
