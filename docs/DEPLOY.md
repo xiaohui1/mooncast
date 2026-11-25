@@ -1,16 +1,44 @@
-# 月映 · MoonCast 部署与使用指南
+# 月映 · MoonCast 完整部署与升级指南
 
 ## 1. Docker 部署与升级
-1. 从 [Releases](https://github.com/xiaohui1/mooncast/releases) 下载 `mooncast-vX.Y.Z-docker-kit.zip` 并解压；
-2. 执行 `docker compose up -d` 启动服务；
-3. 后续升级只需执行包内 `./auto-update.sh`（或 `docker compose pull && docker compose up -d`），全部数据库、海报与日志均保存在 `./data` 目录不会丢失。
+
+### 1.1 目录结构（单卷映射）
+只需映射一个宿主机目录到容器 `/data`，以下全部持久化数据均自动保存在该目录内：
+* `mooncast.db`：SQLite 数据库（用户、影库、追更、历史、设置）
+* `posters/`：本地海报与封面缓存
+* `pansou-cache/`：搜索插件缓存
+* `logs/`：按天分类的运行与播放诊断日志
+* `init_credentials.txt`：首次启动生成的初始管理员账密
+
+### 1.2 启动命令
+```bash
+mkdir -p mooncast && cd mooncast
+# 下载最新 docker-kit.zip 或自建 docker-compose.yml
+docker compose up -d
+```
+
+### 1.3 日常升级
+```bash
+./auto-update.sh
+# 或手动执行：
+docker compose pull && docker compose up -d
+```
+
+---
 
 ## 2. 飞牛 fnOS 原生安装
-1. 根据 NAS CPU 架构下载 `mooncast_X.Y.Z_x86.fpk` 或 `mooncast_X.Y.Z_arm.fpk`；
-2. 打开飞牛应用中心 → 手动安装 → 上传 `.fpk`；
-3. 默认端口 `5220`，支持在管理员控制中心内直接通过「系统更新」检测最新版本。
 
-## 3. 首次使用配置
-1. 使用初始管理员账号登录（查看挂载目录 `/data/init_credentials.txt`）；
-2. 进入「管理 → 夸克账号与 TV 授权」扫码绑定夸克 Cookie 与 QuarkTV 4K 凭证；
-3. 刮削默认支持国内豆瓣直连与 TMDB 主源自动切换，无需代理即可正常刮削海报与简介。
+1. 在 [Releases](https://github.com/xiaohui1/mooncast/releases) 下载对应架构的 `.fpk` 文件；
+2. 飞牛应用中心 → 右上角/左下角「手动安装」→ 上传 `.fpk`；
+3. 安装后点击桌面图标或访问 `http://<NAS_IP>:5220`；
+4. 后续有新版时，可在应用内「管理 → 系统更新」查看更新日志与发布页，或上传新版 `.fpk` 覆盖升级。
+
+---
+
+## 3. 环境变量参考
+
+| 变量名 | 默认值 | 说明 |
+| :--- | :--- | :--- |
+| `MOONCAST_DATA` | `/data` | 持久化数据根目录 |
+| `MOONCAST_LISTEN` | `:5220` | HTTP 服务监听地址与端口 |
+| `TZ` | `Asia/Shanghai` | 时区设置（影响按天日志与定时追更时间） |
