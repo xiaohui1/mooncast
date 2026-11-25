@@ -42,3 +42,13 @@ docker compose pull && docker compose up -d
 | `MOONCAST_DATA` | `/data` | 持久化数据根目录 |
 | `MOONCAST_LISTEN` | `:5220` | HTTP 服务监听地址与端口 |
 | `TZ` | `Asia/Shanghai` | 时区设置（影响按天日志与定时追更时间） |
+
+---
+
+## 4. 容器内配置代理说明（`127.0.0.1` vs 桥接模式）
+
+* **推荐（默认 `network_mode: host`）**：
+  * 官方 `docker-compose.yml` 默认使用 `network_mode: host` 共享宿主机网络，此时在后台设置页可直接填写宿主机本地代理地址，例如 **`http://127.0.0.1:7890`**。
+  * 若同一台设备上还运行了其他服务占用 `5220` 端口，可在 `environment` 中修改 `MOONCAST_LISTEN=:5221` 切换端口。
+* **如果改用桥接模式（`ports: "5220:5220"`）**：
+  * 桥接容器内的 `127.0.0.1` 指向容器自身而非宿主机，需在 `docker-compose.yml` 添加 `extra_hosts: ["host.docker.internal:host-gateway"]`，并在后台代理填写 `http://host.docker.internal:7890` 或宿主机局域网 IP。
