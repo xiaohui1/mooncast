@@ -120,18 +120,23 @@ flowchart TD
 
 #### 七项实战防误排规则
 
-1. **零额外请求识破「标题党虚标集数」**：
-   利用分享顶层元数据自带的 `include_items`（单目录内直属条目数）与 `file_num` 核验实际文件数上限 $`\text{itemCap}`$：
+1. **零额外请求识破「标题党虚标集数」与综艺日期防误判**：
+   利用分享元数据自带的 `all_file_num`（全部文件+目录数）、`file_only_num`（纯文件总数）与 `include_items`（单目录当前直属存活条目数），通过目录总数 $`\text{dirCount} = \text{all\_file\_num} - \text{file\_only\_num}`$ 区分「单层平铺剧集」与「多画质子目录合集」：
+
+```math
+\text{dirCount} = \text{all\_file\_num} - \text{file\_only\_num}
+```
 
 ```math
 \text{itemCap} = \begin{cases}
 \text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\
-\text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\
-0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）}
+\text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{dirCount} \le 1 \\
+\text{file\_only\_num}, & \text{顶层单一目录} \land \text{dirCount} \gt 1 \land \text{file\_only\_num} \gt 0 \\
+0, & \text{其他情况}
 \end{cases}
 ```
 
-   对于非多季合集（`SeasonSpan < 2`），当 $`\text{itemCap} \gt 0 \land \text{EpisodeCount} \gt \text{itemCap}`$ 时，自动将虚标集数下修为真实上限、标签替换为 `实N集` 并重算单集均体积。
+   对于非多季合集（`SeasonSpan < 2`），当 $`\text{itemCap} \gt 0 \land \text{EpisodeCount} \gt \text{itemCap}`$ 时，自动将虚标集数下修为真实上限、标签替换为 `实N集` 并重算单集均体积（既精准识破被和谐仅剩 1~4 集的虚标链，又完整保留多画质子目录 4K 合集）；同时在综艺/真人秀/晚会/期数语境下过滤合法 4 位月日 `MMDD`（如 `更1126`、`1120期`），防止日期被误判为超大集数。
 2. **多季合集严格优先于单季**：解析 `1-8季`、`S01-S08`、`全八季`、`庆余年1-2` 等多季跨度（排除 `第五季 全10集`、`01-03` 连载集号与电影 `1-4部`），多季合集严格排在单季之前且季数越多越靠前。
 3. **精确主片名分级**：精确主片名（支持中文片名后接原版英文片名、年代、画质与语言修饰）严格优先于延伸/衍生/前传/番外/纪录片/整句夹杂标题（如 `庆余年之帝王业`、`泰坦尼克号：沉没之夜`、`龙之家族`、`剧场版` 与 `年番` 错配）。
 4. **网盘会员推广文案剥离**：评分前正则剥离 `（SVIP会员可切换/超高清/60帧/HDR）`、`【SVIP会员可切换/...】` 等客户端推广词，防止普通压制版蹭高帧率分反超 70 GB 蓝光原盘。
