@@ -90,10 +90,8 @@ flowchart TD
 
 ```math
 \text{divisor} = \begin{cases}
-
 2 \times \text{EpisodeCount}, & \text{标题为双版/多版合集} \\
 \text{EpisodeCount}, & \text{单版本剧集}
-
 \end{cases}
 ```
 
@@ -101,12 +99,10 @@ flowchart TD
 
   ```math
   \Delta \text{Score}_{\text{size}} = \begin{cases}
-
   +60, & \text{perEpGB} \ge 4.0\text{ GB} \\
   +38, & 2.5 \le \text{perEpGB} \lt 4.0\text{ GB} \\
   +15, & 1.5 \le \text{perEpGB} \lt 2.5\text{ GB} \\
   0, & \text{perEpGB} \lt 1.5\text{ GB}
-
   \end{cases}
   ```
 
@@ -115,12 +111,10 @@ flowchart TD
 
   ```math
   \Delta \text{Score}_{\text{size}} = \begin{cases}
-
   +60, & \text{totalGB} \ge 25.0\text{ GB} \\
   +38, & 15.0 \le \text{totalGB} \lt 25.0\text{ GB} \\
   +15, & 8.0 \le \text{totalGB} \lt 15.0\text{ GB} \\
   0, & \text{totalGB} \lt 8.0\text{ GB}
-
   \end{cases}
   ```
 
@@ -131,11 +125,9 @@ flowchart TD
 
    ```math
    \text{itemCap} = \begin{cases}
-
    \text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\
    \text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\
    0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）}
-
    \end{cases}
    ```
 
@@ -209,10 +201,8 @@ stateDiagram-v2
 
    ```math
    P_{\text{expected}} = \begin{cases}
-
    \text{position\_sec}, & \text{playing} = \text{false} \\
    \text{position\_sec} + \max\!\left(0,\; \dfrac{t_{\text{now}} + \text{clockOffset} - \text{updated\_at\_ms}}{1000}\right) \times r, & \text{playing} = \text{true}
-
    \end{cases}
    ```
 
