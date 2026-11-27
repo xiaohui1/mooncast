@@ -57,13 +57,18 @@ flowchart TD
    - **硬非影视拦截（`VideoTier = -1`）**：命中 `有声书 / 听书 / 广播剧 / 电子书 / 全N册 / epub / pdf / mp3 / flac` 等直接剔除；
    - **软非影视分级**：`原著 / 小说 / 全本 / 完本` 仅在标题不含明确视频信号（`4K / 1080P / HDR / REMUX / 蓝光 / 剧集` 等）时拦截，避免误杀标注「原著改编」或「典藏版」的高清影视；
    - **验活期空包/非视频兜底拦截**：在验活返回的顶层文件列表中，若满足以下任一条件立即判为无效并写入 60 分钟坏链缓存：
-     $$(\neg\text{hasDir} \land \neg\text{hasVideo}) \;\lor\; (\neg\text{hasVideo} \land 0 < \text{ShareSize} < 30\text{ MB})$$
+
+     ```math
+     (\neg\text{hasDir} \land \neg\text{hasVideo}) \;\lor\; (\neg\text{hasVideo} \land 0 \lt \text{ShareSize} \lt 30\text{ MB})
+     ```
 
 ### 1.3 九级确定性排序链与评分公式
 
 在验活状态（`已验活 > 需提取码 > 未确认`）分层内，按以下 9 级严格比较：
 
-$$\text{非短剧} \;>\; \text{明确视频层} \;>\; \text{精确主片名} \;>\; \text{多季合集} \;>\; \text{核验真实集数} \;>\; \text{画质+体积综合分} \;>\; \text{非纯杜比} \;>\; \text{单集/整片体积} \;>\; \text{更新时间}$$
+```math
+\text{非短剧} \; \gt \; \text{明确视频层} \; \gt \; \text{精确主片名} \; \gt \; \text{多季合集} \; \gt \; \text{核验真实集数} \; \gt \; \text{画质+体积综合分} \; \gt \; \text{非纯杜比} \; \gt \; \text{单集/整片体积} \; \gt \; \text{更新时间}
+```
 
 #### 基础画质与时效评分表
 
@@ -81,22 +86,60 @@ $$\text{非短剧} \;>\; \text{明确视频层} \;>\; \text{精确主片名} \;>
 
 #### 真实体积客观加权与双版折半公式
 
-验活阶段零额外请求采集分享总字节数 $\text{ShareSize}$（若元数据为 `0` 则累加顶层文件体积兜底）。对于标题包含 `DV&HDR`、`双版`、`多版`、`全版本` 的双版本剧集，将集数除数翻倍以准确估算单套单集体积：
+验活阶段零额外请求采集分享总字节数 $`\text{ShareSize}`$（若元数据为 `0` 则累加顶层文件体积兜底）。对于标题包含 `DV&HDR`、`双版`、`多版`、`全版本` 的双版本剧集，将集数除数翻倍以准确估算单套单集体积：
 
-$$\text{divisor} = \begin{cases} 2 \times \text{EpisodeCount}, & \text{标题为双版/多版合集} \\ \text{EpisodeCount}, & \text{单版本剧集} \end{cases}$$
+```math
+\text{divisor} = \begin{cases}
 
-- **剧集单集均体积**（`EpisodeCount > 0`，$\text{perEpGB} = \dfrac{\text{ShareSize}}{\text{divisor} \times 1024^3}$）：
-  $$\Delta \text{Score}_{\text{size}} = \begin{cases} +60, & \text{perEpGB} \ge 4.0\text{ GB} \\ +38, & 2.5 \le \text{perEpGB} < 4.0\text{ GB} \\ +15, & 1.5 \le \text{perEpGB} < 2.5\text{ GB} \\ 0, & \text{perEpGB} < 1.5\text{ GB} \end{cases}$$
-  若同时满足 $\text{EpisodeCount} \ge 5 \land \text{perEpGB} < 0.15\text{ GB}$，自动判定为低码竖屏/微短剧，沉入最末档防止压过正剧。
-- **电影整片体积**（`EpisodeCount == 0`，$\text{totalGB} = \dfrac{\text{ShareSize}}{1024^3}$）：
-  $$\Delta \text{Score}_{\text{size}} = \begin{cases} +60, & \text{totalGB} \ge 25.0\text{ GB} \\ +38, & 15.0 \le \text{totalGB} < 25.0\text{ GB} \\ +15, & 8.0 \le \text{totalGB} < 15.0\text{ GB} \\ 0, & \text{totalGB} < 8.0\text{ GB} \end{cases}$$
+2 \times \text{EpisodeCount}, & \text{标题为双版/多版合集} \\
+\text{EpisodeCount}, & \text{单版本剧集}
+
+\end{cases}
+```
+
+- **剧集单集均体积**（`EpisodeCount > 0`，$`\text{perEpGB} = \dfrac{\text{ShareSize}}{\text{divisor} \times 1024^3}`$）：
+
+  ```math
+  \Delta \text{Score}_{\text{size}} = \begin{cases}
+
+  +60, & \text{perEpGB} \ge 4.0\text{ GB} \\
+  +38, & 2.5 \le \text{perEpGB} \lt 4.0\text{ GB} \\
+  +15, & 1.5 \le \text{perEpGB} \lt 2.5\text{ GB} \\
+  0, & \text{perEpGB} \lt 1.5\text{ GB}
+
+  \end{cases}
+  ```
+
+  若同时满足 $`\text{EpisodeCount} \ge 5 \land \text{perEpGB} \lt 0.15\text{ GB}`$，自动判定为低码竖屏/微短剧，沉入最末档防止压过正剧。
+- **电影整片体积**（`EpisodeCount == 0`，$`\text{totalGB} = \dfrac{\text{ShareSize}}{1024^3}`$）：
+
+  ```math
+  \Delta \text{Score}_{\text{size}} = \begin{cases}
+
+  +60, & \text{totalGB} \ge 25.0\text{ GB} \\
+  +38, & 15.0 \le \text{totalGB} \lt 25.0\text{ GB} \\
+  +15, & 8.0 \le \text{totalGB} \lt 15.0\text{ GB} \\
+  0, & \text{totalGB} \lt 8.0\text{ GB}
+
+  \end{cases}
+  ```
 
 #### 七项实战防误排规则
 
 1. **零额外请求识破「标题党虚标集数」**：
-   利用分享顶层元数据自带的 `include_items`（单目录内直属条目数）与 `file_num` 核验实际文件数上限 $\text{itemCap}$：
-   $$\text{itemCap} = \begin{cases} \text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\ \text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\ 0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）} \end{cases}$$
-   对于非多季合集（`SeasonSpan < 2`），当 $\text{itemCap} > 0 \land \text{EpisodeCount} > \text{itemCap}$ 时，自动将虚标集数下修为真实上限、标签替换为 `实N集` 并重算单集均体积。
+   利用分享顶层元数据自带的 `include_items`（单目录内直属条目数）与 `file_num` 核验实际文件数上限 $`\text{itemCap}`$：
+
+   ```math
+   \text{itemCap} = \begin{cases}
+
+   \text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\
+   \text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\
+   0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）}
+
+   \end{cases}
+   ```
+
+   对于非多季合集（`SeasonSpan < 2`），当 $`\text{itemCap} \gt 0 \land \text{EpisodeCount} \gt \text{itemCap}`$ 时，自动将虚标集数下修为真实上限、标签替换为 `实N集` 并重算单集均体积。
 2. **多季合集严格优先于单季**：解析 `1-8季`、`S01-S08`、`全八季`、`庆余年1-2` 等多季跨度（排除 `第五季 全10集`、`01-03` 连载集号与电影 `1-4部`），多季合集严格排在单季之前且季数越多越靠前。
 3. **精确主片名分级**：精确主片名（支持中文片名后接原版英文片名、年代、画质与语言修饰）严格优先于延伸/衍生/前传/番外/纪录片/整句夹杂标题（如 `庆余年之帝王业`、`泰坦尼克号：沉没之夜`、`龙之家族`、`剧场版` 与 `年番` 错配）。
 4. **网盘会员推广文案剥离**：评分前正则剥离 `（SVIP会员可切换/超高清/60帧/HDR）`、`【SVIP会员可切换/...】` 等客户端推广词，防止普通压制版蹭高帧率分反超 70 GB 蓝光原盘。
@@ -141,7 +184,7 @@ stateDiagram-v2
 | **7** | 其他未标注清晰度目录/文件 | **`150`** | 第 3 档：默认兜底 |
 | **8** | 杜比视界（普通屏幕易绿紫偏色） | **`10`** | 第 4 档：自动沉底 |
 
-- **目录树同档破平**：按画质权重降序 → 同档按**单集平均体积**（$\text{totalSize} / \text{totalVideos}$）降序 → 中文自然排序；纯字幕子目录（`Sub/`、`Subs/`、`字幕/`）自动向上提升至父目录字幕列表。
+- **目录树同档破平**：按画质权重降序 → 同档按**单集平均体积**（$`\text{totalSize} / \text{totalVideos}`$）降序 → 中文自然排序；纯字幕子目录（`Sub/`、`Subs/`、`字幕/`）自动向上提升至父目录字幕列表。
 - **自动追更避坑、纯杜比兜底与原子整体换源**：根目录巡检时优先剔除杜比视界版本；仅当整份分享全部为纯杜比资源（非杜比候选集为空）时自动启用兜底，避免零集可追；落盘按 `QualityPriority` 降序 → 文件体积降序择优，并以「精确文件名 + `SxxExx` 季集键」双键防重；换源采用**原子换仓 + 后台异步清理**机制（先校验并转存新源至新仓，确认成功后再原子切换本地库并异步清空旧云盘目录，零阻塞且绝不丢片）。
 
 ---
@@ -151,17 +194,31 @@ stateDiagram-v2
 ### 3.1 NTP RTT 半程延迟补偿与期望播放点公式
 
 1. **周期时钟偏移校准（建连即校 + 每 30 秒复校）**：
-   客户端发送 `sync_ping(client_ts_ms)`，服务端即时回传 `sync_pong(client_ts_ms, server_time_ms)`。客户端收到回复的本地时刻 $t_{\text{now}}$ 计算往返时延与时钟偏移（假设上下行对称，取 $\text{RTT}/2$ 补偿单程耗时）：
-   $$\text{RTT} = \max\big(0,\; t_{\text{now}} - \text{client\_ts\_ms}\big)$$
-   $$\text{clockOffset} = \text{round}\!\left(\text{server\_time\_ms} + \frac{\text{RTT}}{2} - t_{\text{now}}\right)$$
+   客户端发送 `sync_ping(client_ts_ms)`，服务端即时回传 `sync_pong(client_ts_ms, server_time_ms)`。客户端收到回复的本地时刻 $`t_{\text{now}}`$ 计算往返时延与时钟偏移（假设上下行对称，取 $`\text{RTT}/2`$ 补偿单程耗时）：
+
+   ```math
+   \text{RTT} = \max\big(0,\; t_{\text{now}} - \text{client\_ts\_ms}\big)
+   ```
+
+   ```math
+   \text{clockOffset} = \text{round}\!\left(\text{server\_time\_ms} + \frac{\text{RTT}}{2} - t_{\text{now}}\right)
+   ```
 
 2. **任意时刻期望播放位置公式**：
-   服务端每次状态变更记录基准点 $\text{position\_sec}$、倍速 $r$ 与服务端时间戳 $\text{updated\_at\_ms}$。客户端本地推算房间精确进度：
-   $$P_{\text{expected}} = \begin{cases} \text{position\_sec}, & \text{playing} = \text{false} \\ \text{position\_sec} + \max\!\left(0,\; \dfrac{t_{\text{now}} + \text{clockOffset} - \text{updated\_at\_ms}}{1000}\right) \times r, & \text{playing} = \text{true} \end{cases}$$
+   服务端每次状态变更记录基准点 $`\text{position\_sec}`$、倍速 $`r`$ 与服务端时间戳 $`\text{updated\_at\_ms}`$。客户端本地推算房间精确进度：
+
+   ```math
+   P_{\text{expected}} = \begin{cases}
+
+   \text{position\_sec}, & \text{playing} = \text{false} \\
+   \text{position\_sec} + \max\!\left(0,\; \dfrac{t_{\text{now}} + \text{clockOffset} - \text{updated\_at\_ms}}{1000}\right) \times r, & \text{playing} = \text{true}
+
+   \end{cases}
+   ```
 
 ### 3.2 三段式漂移校准与缓冲保护
 
-定义本地有符号漂移 $\text{signedDrift} = P_{\text{expected}} - v.\text{currentTime}$，$\text{absDrift} = |\text{signedDrift}|$：
+定义本地有符号漂移 $`\text{signedDrift} = P_{\text{expected}} - v.\text{currentTime}`$，$`\text{absDrift} = |\text{signedDrift}|`$：
 
 ```mermaid
 flowchart TD
@@ -183,11 +240,11 @@ flowchart TD
 
 | 场景 / 区间 | 阈值条件 | 校准动作 | 体验价值 |
 | :--- | :--- | :--- | :--- |
-| **显式指令 / 入房首帧** | $\text{absDrift} \ge 0.35\text{ s}$ | 立即硬对齐 | 切集、拖拽、暂停瞬间精准一致 |
+| **显式指令 / 入房首帧** | $`\text{absDrift} \ge 0.35\text{ s}`$ | 立即硬对齐 | 切集、拖拽、暂停瞬间精准一致 |
 | **弱网缓冲保护** | 心跳帧且 `readyState < 3` | 跳过校准 | 避免 4K HLS 缓冲期间被心跳反复 seek 打断 |
-| **死区静默段** | $\text{absDrift} < 0.8\text{ s}$ | 零干预 | 消除微抖动导致的音画撕裂 |
-| **平滑倍速追赶段** | $0.8\text{ s} \le \text{absDrift} < 3.0\text{ s}$ | `±3%` 倍速维持 `3.5s` 自动复位 | **零额外分片下载、零跳帧、人耳无感拉齐** |
-| **硬跳校准段** | $\text{absDrift} \ge 3.0\text{ s}$ | 直接跳至期望点 | 仅针对切后台/严重卡顿后的大跨度落后生效 |
+| **死区静默段** | $`\text{absDrift} \lt 0.8\text{ s}`$ | 零干预 | 消除微抖动导致的音画撕裂 |
+| **平滑倍速追赶段** | $`0.8\text{ s} \le \text{absDrift} \lt 3.0\text{ s}`$ | `±3%` 倍速维持 `3.5s` 自动复位 | **零额外分片下载、零跳帧、人耳无感拉齐** |
+| **硬跳校准段** | $`\text{absDrift} \ge 3.0\text{ s}`$ | 直接跳至期望点 | 仅针对切后台/严重卡顿后的大跨度落后生效 |
 
 ### 3.3 单向指令与回显忽略（零 ping-pong 震荡）
 
@@ -218,8 +275,11 @@ flowchart TD
     U -->|"失败"| D7["回退 GB18030 / GBK"]
 ```
 
-无 BOM UTF-16 奇偶位判定公式（采样长度 $L = \min(N, 256)$）：
-$$R_{\text{even}} = \frac{|\{i \in [0, L) : i \bmod 2 = 0 \land \text{raw}[i] = \texttt{0x00}\}|}{\text{evenCount}}, \qquad R_{\text{odd}} = \frac{|\{i \in [0, L) : i \bmod 2 = 1 \land \text{raw}[i] = \texttt{0x00}\}|}{\text{oddCount}}$$
+无 BOM UTF-16 奇偶位判定公式（采样长度 $`L = \min(N, 256)`$）：
+
+```math
+R_{\text{even}} = \frac{|\{i \in [0, L) : i \bmod 2 = 0 \land \text{raw}[i] = \texttt{0x00}\}|}{\text{evenCount}}, \qquad R_{\text{odd}} = \frac{|\{i \in [0, L) : i \bmod 2 = 1 \land \text{raw}[i] = \texttt{0x00}\}|}{\text{oddCount}}
+```
 
 ### 4.2 ASS `[Events]` 节作用域与 `{\p1}` 矢量绘图滤除
 
