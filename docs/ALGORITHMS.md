@@ -58,9 +58,9 @@ flowchart TD
    - **软非影视分级**：`原著 / 小说 / 全本 / 完本` 仅在标题不含明确视频信号（`4K / 1080P / HDR / REMUX / 蓝光 / 剧集` 等）时拦截，避免误杀标注「原著改编」或「典藏版」的高清影视；
    - **验活期空包/非视频兜底拦截**：在验活返回的顶层文件列表中，若满足以下任一条件立即判为无效并写入 60 分钟坏链缓存：
 
-     ```math
-     (\neg\text{hasDir} \land \neg\text{hasVideo}) \;\lor\; (\neg\text{hasVideo} \land 0 \lt \text{ShareSize} \lt 30\text{ MB})
-     ```
+```math
+(\neg\text{hasDir} \land \neg\text{hasVideo}) \;\lor\; (\neg\text{hasVideo} \land 0 \lt \text{ShareSize} \lt 30\text{ MB})
+```
 
 ### 1.3 九级确定性排序链与评分公式
 
@@ -97,39 +97,39 @@ flowchart TD
 
 - **剧集单集均体积**（`EpisodeCount > 0`，$`\text{perEpGB} = \dfrac{\text{ShareSize}}{\text{divisor} \times 1024^3}`$）：
 
-  ```math
-  \Delta \text{Score}_{\text{size}} = \begin{cases}
-  +60, & \text{perEpGB} \ge 4.0\text{ GB} \\
-  +38, & 2.5 \le \text{perEpGB} \lt 4.0\text{ GB} \\
-  +15, & 1.5 \le \text{perEpGB} \lt 2.5\text{ GB} \\
-  0, & \text{perEpGB} \lt 1.5\text{ GB}
-  \end{cases}
-  ```
+```math
+\Delta \text{Score}_{\text{size}} = \begin{cases}
++60, & \text{perEpGB} \ge 4.0\text{ GB} \\
++38, & 2.5 \le \text{perEpGB} \lt 4.0\text{ GB} \\
++15, & 1.5 \le \text{perEpGB} \lt 2.5\text{ GB} \\
+0, & \text{perEpGB} \lt 1.5\text{ GB}
+\end{cases}
+```
 
   若同时满足 $`\text{EpisodeCount} \ge 5 \land \text{perEpGB} \lt 0.15\text{ GB}`$，自动判定为低码竖屏/微短剧，沉入最末档防止压过正剧。
 - **电影整片体积**（`EpisodeCount == 0`，$`\text{totalGB} = \dfrac{\text{ShareSize}}{1024^3}`$）：
 
-  ```math
-  \Delta \text{Score}_{\text{size}} = \begin{cases}
-  +60, & \text{totalGB} \ge 25.0\text{ GB} \\
-  +38, & 15.0 \le \text{totalGB} \lt 25.0\text{ GB} \\
-  +15, & 8.0 \le \text{totalGB} \lt 15.0\text{ GB} \\
-  0, & \text{totalGB} \lt 8.0\text{ GB}
-  \end{cases}
-  ```
+```math
+\Delta \text{Score}_{\text{size}} = \begin{cases}
++60, & \text{totalGB} \ge 25.0\text{ GB} \\
++38, & 15.0 \le \text{totalGB} \lt 25.0\text{ GB} \\
++15, & 8.0 \le \text{totalGB} \lt 15.0\text{ GB} \\
+0, & \text{totalGB} \lt 8.0\text{ GB}
+\end{cases}
+```
 
 #### 七项实战防误排规则
 
 1. **零额外请求识破「标题党虚标集数」**：
    利用分享顶层元数据自带的 `include_items`（单目录内直属条目数）与 `file_num` 核验实际文件数上限 $`\text{itemCap}`$：
 
-   ```math
-   \text{itemCap} = \begin{cases}
-   \text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\
-   \text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\
-   0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）}
-   \end{cases}
-   ```
+```math
+\text{itemCap} = \begin{cases}
+\text{file\_num}\text{（或顶层列表长度）}, & \text{顶层全为平铺文件} \\
+\text{List}[0].\text{include\_items}, & \text{顶层单一目录} \land \text{include\_items} \ge 5 \\
+0, & \text{其他情况（如 2\textasciitilde 4 个画质子目录）}
+\end{cases}
+```
 
    对于非多季合集（`SeasonSpan < 2`），当 $`\text{itemCap} \gt 0 \land \text{EpisodeCount} \gt \text{itemCap}`$ 时，自动将虚标集数下修为真实上限、标签替换为 `实N集` 并重算单集均体积。
 2. **多季合集严格优先于单季**：解析 `1-8季`、`S01-S08`、`全八季`、`庆余年1-2` 等多季跨度（排除 `第五季 全10集`、`01-03` 连载集号与电影 `1-4部`），多季合集严格排在单季之前且季数越多越靠前。
@@ -188,23 +188,23 @@ stateDiagram-v2
 1. **周期时钟偏移校准（建连即校 + 每 30 秒复校）**：
    客户端发送 `sync_ping(client_ts_ms)`，服务端即时回传 `sync_pong(client_ts_ms, server_time_ms)`。客户端收到回复的本地时刻 $`t_{\text{now}}`$ 计算往返时延与时钟偏移（假设上下行对称，取 $`\text{RTT}/2`$ 补偿单程耗时）：
 
-   ```math
-   \text{RTT} = \max\big(0,\; t_{\text{now}} - \text{client\_ts\_ms}\big)
-   ```
+```math
+\text{RTT} = \max\big(0,\; t_{\text{now}} - \text{client\_ts\_ms}\big)
+```
 
-   ```math
-   \text{clockOffset} = \text{round}\!\left(\text{server\_time\_ms} + \frac{\text{RTT}}{2} - t_{\text{now}}\right)
-   ```
+```math
+\text{clockOffset} = \text{round}\!\left(\text{server\_time\_ms} + \frac{\text{RTT}}{2} - t_{\text{now}}\right)
+```
 
 2. **任意时刻期望播放位置公式**：
    服务端每次状态变更记录基准点 $`\text{position\_sec}`$、倍速 $`r`$ 与服务端时间戳 $`\text{updated\_at\_ms}`$。客户端本地推算房间精确进度：
 
-   ```math
-   P_{\text{expected}} = \begin{cases}
-   \text{position\_sec}, & \text{playing} = \text{false} \\
-   \text{position\_sec} + \max\!\left(0,\; \dfrac{t_{\text{now}} + \text{clockOffset} - \text{updated\_at\_ms}}{1000}\right) \times r, & \text{playing} = \text{true}
-   \end{cases}
-   ```
+```math
+P_{\text{expected}} = \begin{cases}
+\text{position\_sec}, & \text{playing} = \text{false} \\
+\text{position\_sec} + \max\!\left(0,\; \dfrac{t_{\text{now}} + \text{clockOffset} - \text{updated\_at\_ms}}{1000}\right) \times r, & \text{playing} = \text{true}
+\end{cases}
+```
 
 ### 3.2 三段式漂移校准与缓冲保护
 
